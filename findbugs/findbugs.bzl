@@ -10,35 +10,41 @@ def _collect_jars(targets):
     return jars
 
 def _findbugs_impl(ctx):
-    cmd = "external/local_jdk/bin/java -jar {findbugslib} -output {out} {jars}"
+    cmd = """#!/bin/bash
+    set -e
+    output=$({java} -jar {findbugslib} -textui {jars})
+    echo $output
+    if [ -n "$output" ]; then
+        exit 1
+    fi
+    """
 
-    jars = _collect_jars(ctx.attr.deps)
+    java = ctx.file._java
     findbugslib = ctx.files._findbugslib[0]
+    jars = _collect_jars(ctx.attr.deps)
+
     cmd = cmd.format(
+        java=java.path,
         findbugslib=findbugslib.path,
-        out=ctx.outputs.executable.path,
-        jars=" ".join([j.path for j in jars]),
+        jars=" ".join([j.short_path for j in jars])
     )
-    all_inputs = list(jars) + ctx.files._jdk + ctx.files._findbugslib
-    ctx.action(
-        inputs=all_inputs,
-        outputs=[ctx.outputs.executable],
-        command=cmd,
-        progress_message="FindBugs %s" % ctx.label,
-        mnemonic = "FindBugs",
-        use_default_shell_env = True
+    ctx.file_action(
+        output=ctx.outputs.executable,
+        content=cmd
     )
-    all_runfiles = ctx.runfiles(files = all_inputs, collect_data = True)
-    return struct(
-        files=set([ctx.outputs.executable]),
-        runfiles=all_runfiles)
+
+    runfiles = ctx.runfiles(
+        files = list(jars) + [ctx.outputs.executable] + [java] + [findbugslib],
+        collect_data = True
+    )
+    return struct(files=set([ctx.outputs.executable]), runfiles=runfiles)
 
 findbugs_test = rule(
     implementation=_findbugs_impl,
     attrs={
         "deps": attr.label_list(allow_files=False),
         "_findbugslib": attr.label(default=Label("@findbugs//:lib/findbugs.jar"), single_file=True, allow_files=True),
-        "_jdk": attr.label(default=Label("//tools/defaults:jdk"), allow_files=True),
+        "_java": attr.label(executable=True, default=Label("@bazel_tools//tools/jdk:java"), single_file=True, allow_files=True),
     },
     test=True,
 )
