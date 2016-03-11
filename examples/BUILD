@@ -9,7 +9,8 @@ findbugs_test(
     name="good-bugs",
     deps = [
         ":good-lib",
-    ]
+    ],
+    size="small"
 )
 
 java_library(
@@ -21,7 +22,8 @@ findbugs_test(
     name="bad-bugs",
     deps = [
         ":bad-lib",
-    ]
+    ],
+    size="small"
 )
 
 findbugs_test(
@@ -29,5 +31,6 @@ findbugs_test(
     exclude="exclude.xml",
     deps = [
         ":bad-lib",
-    ]
+    ],
+    size="small"
 )
