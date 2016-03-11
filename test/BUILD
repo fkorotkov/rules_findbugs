@@ -23,3 +23,11 @@ findbugs_test(
         ":bad-lib",
     ]
 )
+
+findbugs_test(
+    name="bad-bugs-excluded",
+    exclude="exclude.xml",
+    deps = [
+        ":bad-lib",
+    ]
+)

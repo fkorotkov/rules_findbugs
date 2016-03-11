@@ -1,0 +1,6 @@
+<FindBugsFilter>
+    <Match>
+        <Class name="Bad" />
+        <Bug code="CN" />
+    </Match>
+</FindBugsFilter>
