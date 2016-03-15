@@ -3,6 +3,7 @@ import subprocess
 targets_to_test = [
   {'target': 'examples:good-bugs'},
   {'target': 'examples:bad-bugs', 'expected_to_fail': True},
+  {'target': 'examples:bad-bugs-high', 'expected_to_fail': False},
   {'target': 'examples:bad-bugs-excluded', 'expected_to_fail': False},
 ]
 

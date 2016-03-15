@@ -15,7 +15,7 @@ def _findbugs_impl(ctx):
     cmd = """#!/bin/bash
     set -e
     output=$({java} -jar {findbugslib} {findbugs_args} {jars})
-    echo $output
+    echo "$output"
     if [ -n "$output" ]; then
         exit 1
     fi
@@ -28,6 +28,8 @@ def _findbugs_impl(ctx):
     files_for_cmd = [java, findbugslib]
     findbugs_args = ['-textui']
 
+    if ctx.attr.options:
+        findbugs_args += [ctx.attr.options]
     if ctx.file.include:
         files_for_cmd += [ctx.file.include]
         findbugs_args += ['-include', ctx.file.include.short_path]
@@ -56,6 +58,7 @@ findbugs_test = rule(
     implementation=_findbugs_impl,
     attrs={
         "deps": attr.label_list(allow_files=False),
+        "options": attr.string(mandatory=False),
         "include": attr.label(mandatory=False, allow_files=_xml_filetype, single_file=True),
         "exclude": attr.label(mandatory=False, allow_files=_xml_filetype, single_file=True),
         "_findbugslib": attr.label(default=Label("@findbugs//:lib/findbugs.jar"), single_file=True, allow_files=True),

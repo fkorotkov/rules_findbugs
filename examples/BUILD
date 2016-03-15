@@ -34,3 +34,12 @@ findbugs_test(
     ],
     size="small"
 )
+
+findbugs_test(
+    name="bad-bugs-high",
+    options="-high",
+    deps = [
+        ":bad-lib",
+    ],
+    size="small"
+)
